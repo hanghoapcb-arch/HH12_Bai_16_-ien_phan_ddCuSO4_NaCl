@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Phòng thí nghiệm 3D – Điện phân CuSO₄ và NaCl</title>
+<style>
+:root{--bg:#eaf1f8;--bg2:#d5e3f1;--card:#fff;--tx:#14202e;--mu:#546579;--bd:#c5d3e2;--ac:#1d6fd1;--ok:#0e8a5f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0f1722;--bg2:#1b2a3d;--card:#1a2636;--tx:#e8eef6;--mu:#9bb0c6;--bd:#2c3b50;--ac:#5aa2f5;--ok:#43c996}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0f1722;--bg2:#1b2a3d;--card:#1a2636;--tx:#e8eef6;--mu:#9bb0c6;--bd:#2c3b50;--ac:#5aa2f5;--ok:#43c996}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{font:15px/1.5 system-ui,"Segoe UI",Roboto,sans-serif;color:var(--tx);background:var(--bg)}
+#app{display:flex;flex-direction:column;height:100%}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--bd);background:var(--card)}
+h1{font-size:16px;margin:0}h2{font-size:15px;margin:0 0 8px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+button,select,textarea{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:5px 11px;cursor:pointer}
+button.on{background:var(--ac);border-color:var(--ac);color:#fff}button.go{background:var(--ok);border-color:var(--ok);color:#fff}
+main{flex:1;min-height:0;display:grid;grid-template-columns:1fr;overflow:auto}
+#mid{display:flex;flex-direction:column;min-height:0;order:-1}
+#stage{position:relative;flex:1 1 auto;min-height:62vh;background:linear-gradient(var(--bg2),var(--bg));touch-action:none;overflow:hidden}
+#stage canvas{display:block;width:100%;height:100%}
+#hint{position:absolute;left:10px;bottom:6px;font-size:12px;color:var(--mu);pointer-events:none}
+#lgd{position:absolute;left:10px;top:8px;display:flex;flex-wrap:wrap;gap:3px 12px;font-size:13px;background:color-mix(in srgb,var(--card) 80%,transparent);padding:4px 10px;border-radius:8px;pointer-events:none}
+#lgd i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+#bar{padding:8px 12px;background:var(--card);border-top:1px solid var(--bd);display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+#bar label{display:flex;gap:6px;align-items:center}#bar input[type=range]{width:120px}
+#ro{flex:1 0 100%;font-size:14px}
+.side{padding:12px;overflow:auto;background:var(--card);border-top:1px solid var(--bd);min-height:200px}
+.tb{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.eq{font-family:ui-monospace,Consolas,monospace;background:var(--bg);border-radius:6px;padding:4px 8px;margin:3px 0;display:block;overflow-x:auto;white-space:nowrap}
+.mu{color:var(--mu);font-size:13px}
+ol.st{padding-left:0;list-style:none;margin:0}ol.st li{padding:8px 10px;border:1px solid var(--bd);border-radius:10px;margin-bottom:8px}
+ol.st li.done{border-color:var(--ok)}ol.st li.cur{border-color:var(--ac);background:var(--bg)}
+.q{border:1px solid var(--bd);border-radius:10px;padding:10px;margin-bottom:10px}
+.q textarea{width:100%;min-height:60px;margin:6px 0;cursor:text;display:block}
+.ans{display:none;margin-top:6px;padding:8px;border-radius:8px;background:var(--bg);border-left:3px solid var(--ok)}.ans.sh{display:block}
+.fs .side{display:none}
+@media(min-width:1000px){main{grid-template-columns:300px 1fr 360px;overflow:hidden}#mid{order:0}#stage{min-height:0}.side{border:0;border-right:1px solid var(--bd)}#R{border-right:0;border-left:1px solid var(--bd)}.fs main{grid-template-columns:1fr}}
+</style></head><body>
+<div id="app">
+<header><h1>⚗️ Điện phân dung dịch CuSO₄ và NaCl – Hóa học 12 (KNTT)</h1>
+<div class="tabs"><button id="tCu" class="on">CuSO₄</button><button id="tNa">NaCl</button><button id="tFs">⛶ Phóng to</button></div></header>
+<main>
+<section class="side" id="L"><div class="tb" id="lt"><button data-t="0" class="on">Chuẩn bị</button><button data-t="1">Tiến hành</button><button data-t="2">Phương trình</button></div><div id="lp"></div></section>
+<section id="mid"><div id="stage"><div id="lgd"></div><div id="hint">Kéo để xoay · cuộn / chụm hai ngón để thu phóng</div></div>
+<div id="bar">
+<span id="optCu"><label><input type="checkbox" id="cAn"> Anode bằng Cu</label></span>
+<span id="optNa" style="display:none"><label><input type="checkbox" id="cDia"> Màng ngăn xốp</label> <label><input type="checkbox" id="cPh"> Phenolphthalein</label></span>
+<label><input type="checkbox" id="cIon" checked> Hiện ion</label>
+<label>U = <b id="vv">4.5</b> V <input type="range" id="V" min="3" max="6" step="0.5" value="4.5"></label>
+<select id="spd"><option value="30">Thời gian ×30</option><option value="90">×90</option><option value="200">×200</option></select>
+<button class="go" id="bRun">▶ Bật nguồn</button><button id="bRst">↺ Làm lại</button><button id="bView">⟲ Góc nhìn</button><button id="bPetal" style="display:none">🌸 Nhúng cánh hoa</button>
+<div id="ro"></div></div></section>
+<section class="side" id="R"><h2>❓ Câu hỏi tương tác</h2><div id="qs"></div></section>
+</main></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=id=>document.getElementById(id),rnd=Math.random,wrap=$('stage');
+const R=new THREE.WebGLRenderer({antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio,2));wrap.appendChild(R.domElement);
+const S=new THREE.Scene(),cam=new THREE.PerspectiveCamera(38,1,.1,100);
+S.add(new THREE.HemisphereLight(0xffffff,0x8899aa,.95));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(4,6,5);S.add(dl);
+let th=.25,ph=1.4,rad=11,tgt=new THREE.Vector3(0,1,0);
+function upCam(){cam.position.set(tgt.x+rad*Math.sin(ph)*Math.sin(th),tgt.y+rad*Math.cos(ph),tgt.z+rad*Math.sin(ph)*Math.cos(th));cam.lookAt(tgt)}
+const ptr=new Map();let pd=0;
+R.domElement.addEventListener('pointerdown',e=>{ptr.set(e.pointerId,e);R.domElement.setPointerCapture(e.pointerId);pd=0});
+R.domElement.addEventListener('pointerup',e=>ptr.delete(e.pointerId));R.domElement.addEventListener('pointercancel',e=>ptr.delete(e.pointerId));
+R.domElement.addEventListener('pointermove',e=>{const o=ptr.get(e.pointerId);if(!o)return;
+ if(ptr.size==1){th-=(e.clientX-o.clientX)*.007;ph=Math.min(2.2,Math.max(.4,ph-(e.clientY-o.clientY)*.006))}
+ else if(ptr.size==2){const [a,b]=[...ptr.values()];const d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);if(pd)rad=Math.min(30,Math.max(3,rad*pd/d));pd=d}
+ ptr.set(e.pointerId,e);upCam()});
+R.domElement.addEventListener('wheel',e=>{e.preventDefault();rad=Math.min(30,Math.max(3,rad*(1+e.deltaY*.001)));upCam()},{passive:false});
+function fit(){th=.25;ph=1.4;const g=mode=='cu'?gCu:gNa,b=new THREE.Box3().setFromObject(g),c=b.getCenter(new THREE.Vector3()),s=b.getSize(new THREE.Vector3());tgt.copy(c);
+ const t=Math.tan(cam.fov*Math.PI/360);rad=Math.max(s.y/2/t,s.x/2/(t*cam.aspect))*1.08+s.z/2;upCam()}
+new ResizeObserver(()=>{const w=wrap.clientWidth,h=wrap.clientHeight;if(!w||!h)return;R.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();if(typeof mode!=='undefined'&&typeof gCu!=='undefined')fit()}).observe(wrap);
+
+const M=(c,o=1,x={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,transparent:o<1,opacity:o,roughness:.35,depthWrite:o>=1},x));
+const glass=new THREE.MeshPhysicalMaterial({color:0xcfe9ff,transparent:true,opacity:.16,roughness:0,side:THREE.DoubleSide,depthWrite:false});
+const mesh=(g,m,x=0,y=0,z=0)=>{const o=new THREE.Mesh(g,m);o.position.set(x,y,z);return o};
+const sph=new THREE.SphereGeometry(1,10,8),cyl=new THREE.CylinderGeometry(1,1,1,20),V3=THREE.Vector3;
+function label(t,col='#fff',w=2){const c=document.createElement('canvas');c.width=256;c.height=64;const g=c.getContext('2d');
+ g.fillStyle='rgba(20,32,46,.78)';g.beginPath();g.roundRect(4,8,248,48,14);g.fill();g.fillStyle=col;g.font='bold 28px sans-serif';g.textAlign='center';g.fillText(t,128,44);
+ const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false}));s.scale.set(w,w/4,1);s.renderOrder=9;return s}
+function circ(t,col){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle='#fff';g.strokeStyle=col;g.lineWidth=8;g.beginPath();g.arc(64,64,52,0,7);g.fill();g.stroke();
+ g.fillStyle=col;g.fillRect(34,58,60,12);if(t=='+')g.fillRect(58,34,12,60);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false}));s.scale.set(.8,.8,1);s.renderOrder=9;return s}
+const EL=[];
+function wires(g,xa,xc,yt,yb,dx,cc){
+ [[xa,0xe53935],[xc,cc]].forEach(([x,c])=>g.add(mesh(new THREE.BoxGeometry(.24,.55,.24),M(c),x,yt-.25,0)));
+ const wa=new THREE.QuadraticBezierCurve3(new V3(xa,yt-.05,0),new V3(xa-.6,yt+.9,0),new V3(xa-dx,yt-.4,0)),wc=new THREE.QuadraticBezierCurve3(new V3(xc+dx,yt-.4,0),new V3(xc+.6,yt+.9,0),new V3(xc,yt-.05,0));
+ g.add(mesh(new THREE.TubeGeometry(wa,24,.035,6),M(0xe53935)),mesh(new THREE.TubeGeometry(wc,24,.035,6),M(0x222222)));
+ const sa=circ('+','#e53935'),sc=circ('−','#222');sa.position.set(xa-dx,yt-.6,0);sc.position.set(xc+dx,yt-.6,0);g.add(sa,sc);
+ const pa=new THREE.CurvePath(),pc=new THREE.CurvePath();
+ pa.add(new THREE.LineCurve3(new V3(xa,yb,0),new V3(xa,yt-.05,0)));pa.add(wa);pc.add(wc);pc.add(new THREE.LineCurve3(new V3(xc,yt-.05,0),new V3(xc,yb,0)));
+ [pa,pc].forEach(P=>{const L=P.getLength();for(let i=0;i<26;i++){const m=mesh(sph,new THREE.MeshBasicMaterial({color:0xffe14d,depthTest:false}));m.scale.setScalar(.085);m.renderOrder=8;m.visible=false;g.add(m);EL.push({m,P,L,u:i/26,g})}})}
+const addL=(g,t,x,y,w,c)=>{const l=label(t,c,w);l.position.set(x,y,0);g.add(l)};
+// ---- CuSO4 U-tube (Hình 16.2)
+const gCu=new THREE.Group();S.add(gCu);
+function uPts(top){const p=[];for(let y=top;y>-.5;y-=.25)p.push(new V3(-1.2,y,0));
+ for(let a=Math.PI;a<=2*Math.PI+1e-6;a+=Math.PI/16)p.push(new V3(1.2*Math.cos(a),-.5+1.2*Math.sin(a),0));
+ for(let y=-.25;y<=top+1e-6;y+=.25)p.push(new V3(1.2,y,0));return p}
+const lc=new THREE.CatmullRomCurve3(uPts(1.4),false,'centripetal'),LL=lc.getLength(),sA=1.25/LL,sC=1-sA;
+gCu.add(mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(uPts(2),false,'centripetal'),160,.38,16),glass));
+[-1.2,1.2].forEach(x=>{const t=mesh(new THREE.TorusGeometry(.4,.05,8,24),glass,x,2,0);t.rotation.x=Math.PI/2;gCu.add(t)});
+const liqCu=M(0x4fb4e8,.6,{roughness:.1});gCu.add(mesh(new THREE.TubeGeometry(lc,160,.34,16),liqCu));
+[-1.2,1.2].forEach(x=>{const d=mesh(new THREE.CircleGeometry(.34,20),liqCu,x,1.4,0);d.rotation.x=-Math.PI/2;gCu.add(d)});
+gCu.add(mesh(new THREE.BoxGeometry(2.8,.55,1.2),M(0x333a44),0,-2.0,0));
+const anCu=mesh(cyl,M(0x2b2b2b),-1.2,1.525,0),caCu=mesh(cyl,M(0x2b2b2b),1.2,1.525,0),dep=mesh(cyl,M(0xd2691e,1,{roughness:.6}),1.2,.775,0);
+anCu.scale.set(.11,2.75,.11);caCu.scale.set(.11,2.75,.11);dep.scale.set(.12,1.25,.12);gCu.add(anCu,caCu,dep);wires(gCu,-1.2,1.2,2.9,.15,1.4,0x2e9e4f);
+addL(gCu,'Anode (+)',-2.7,1.1,1.8,'#ff8a80');addL(gCu,'Cathode (−)',2.8,1.1,1.9,'#cfd8dc');addL(gCu,'Dung dịch CuSO₄',-2.7,-.7,2.5,'#9fd8ff');
+// ---- NaCl beaker (Hình 16.3)
+const gNa=new THREE.Group();S.add(gNa);gNa.visible=false;
+gNa.add(mesh(new THREE.CylinderGeometry(1.7,1.7,3,40,1,true),glass,0,.5,0));gNa.add(mesh(new THREE.CylinderGeometry(1.7,1.7,.05,40),glass,0,-1,0));
+const lm=()=>M(0xe6f4f1,.5,{roughness:.1}),liqR=lm(),liqL=lm();
+gNa.add(mesh(new THREE.CylinderGeometry(1.62,1.62,2.4,40,1,false,0,Math.PI),liqR,0,.2,0),mesh(new THREE.CylinderGeometry(1.62,1.62,2.4,40,1,false,Math.PI,Math.PI),liqL,0,.2,0));
+gNa.add(mesh(new THREE.CylinderGeometry(1.95,1.95,.08,48),M(0xd9a566),0,2.04,0));
+const dia=mesh(new THREE.BoxGeometry(.06,2.4,3.2),M(0x9a8a70,.55),0,.2,0);gNa.add(dia);
+const anNa=mesh(cyl,M(0x2b2b2b),-.7,1.05,0),caNa=mesh(cyl,M(0x2b2b2b),.7,1.05,0);anNa.scale.set(.1,3.7,.1);caNa.scale.set(.1,3.7,.1);gNa.add(anNa,caNa);wires(gNa,-.7,.7,2.9,-.8,1.3,0x222222);
+addL(gNa,'Anode',-2.7,1.1,1.5,'#ff8a80');addL(gNa,'Cathode',2.2,1.1,1.6,'#cfd8dc');
+const cup=mesh(new THREE.CylinderGeometry(.5,.5,1,20,1,true),glass,3.4,-.5,0),cupL=M(0xe6f4f1,.6),petal=mesh(sph,M(0xf06292,1,{roughness:.8}),3.4,-.75,0);
+petal.scale.set(.38,.07,.25);gNa.add(cup,mesh(new THREE.CylinderGeometry(.46,.46,.55,20),cupL,3.4,-.72,0),petal);addL(gNa,'Cánh hoa hồng + 5 mL dd',3.4,.4,2.4,'#fff');
+
+// ---- state
+const IT={cu:[0x2f7fe0,.08,'Cu²⁺'],so:[0xe6c200,.1,'SO₄²⁻'],h:[0xff5c5c,.055,'H⁺'],na:[0xa070e0,.075,'Na⁺'],cl:[0x34c759,.09,'Cl⁻'],oh:[0xff4fa0,.065,'OH⁻'],clo:[0x20c4b4,.085,'ClO⁻']};
+const N=30,ions={cu:[],na:[]};let mode='cu';
+function mkIon(k,g,arr){for(let i=0;i<(k=='cu'||k=='so'||k=='na'||k=='cl'?40:N);i++){const m=mesh(sph,M(IT[k][0],1,{roughness:.3}));m.scale.setScalar(IT[k][1]*1.5);g.add(m);
+ arr.push({k,i,m,s:.5,on:false,off:new THREE.Vector3((rnd()-.5)*.28,(rnd()-.5)*.1,(rnd()-.5)*.4),r:rnd()})}}
+['cu','so','h'].forEach(k=>mkIon(k,gCu,ions.cu));['na','cl','oh','clo'].forEach(k=>mkIon(k,gNa,ions.na));
+const bmat={o2:M(0xffffff,.85),cl:M(0xc8e65a,.9),h2:M(0xffffff,.75)},bub=[];
+for(let i=0;i<90;i++){const m=mesh(sph,bmat.o2);m.visible=false;S.add(m);bub.push({m,on:false,v:1,ph:0,k:'o2',top:1.4})}
+let run=false,V=4.5,sp=30,tt=0,Q=0,p=0,acc=0,showIon=true,cuAn=false,hasDia=false,phen=false,dip=false,bl=0,clock=new THREE.Clock(),rt=0;
+const F=96485,VM=24.79,qmax=()=>mode=='cu'?500:400;
+function reset(){run=false;tt=Q=p=acc=bl=0;dip=false;bub.forEach(b=>{b.on=false;b.m.visible=false});[...ions.cu,...ions.na].forEach(o=>{o.on=false;initIon(o)});$('bRun').textContent='▶ Bật nguồn';$('bRun').className='go';$('bPetal').disabled=false}
+function initIon(o){const k=o.k;
+ if(mode=='cu'){if(k=='cu')o.s=sA+.05+rnd()*(sC-sA-.1);else if(k=='so')o.s=sA+.05+rnd()*(sC-sA-.1);else o.s=sA+.04}
+ else{const a=rnd()*6.28,r=Math.sqrt(rnd())*1.4;o.m.position.set(Math.max(-1.45,Math.min(1.45,r*Math.cos(a))),-.9+rnd()*2.1,r*Math.sin(a)*.9)}}
+function stepIons(dt){const d=run?V/4.5:0;
+ if(mode=='cu'){for(const o of ions.cu){const k=o.k;let on=true;
+  if(k=='h'){on=o.i<p*N;if(on&&!o.on)o.s=sA+.03+rnd()*.04;o.s+=(d*.04*(.5+o.r)+(rnd()-.5)*.012)*dt*60;o.s=Math.min(sC-.03,Math.max(sA+.03,o.s))}
+  else if(k=='cu'){on=cuAn||o.i<40*(1-.85*p);o.s+=(d*.07*(.5+o.r)*dt)+(rnd()-.5)*.006;if(o.s>sC-.025)o.s=cuAn?sA+.03+rnd()*.05:sA+.05+rnd()*.3}
+  else{o.s-=d*.07*(.5+o.r)*dt;o.s+=(rnd()-.5)*.006;if(o.s<sA+.025)o.s=.5+rnd()*(sC-.55)}
+  o.on=on;o.m.visible=on&&showIon;if(on)o.m.position.copy(lc.getPointAt(Math.min(1,Math.max(0,o.s)))).add(o.off)}}
+ else for(const o of ions.na){const k=o.k;let on=true;
+  if(k=='oh'){on=o.i<N*(hasDia?p:p*.35);if(on&&!o.on)o.m.position.set(.6+rnd()*.3,-.8+rnd()*2,(rnd()-.5)*.5)}
+  else if(k=='clo'){on=!hasDia&&o.i<N*p*.9;if(on&&!o.on)o.m.position.set((rnd()-.5)*2.4,-.8+rnd()*2,(rnd()-.5)*2)}
+  o.on=on;o.m.visible=on&&showIon;if(!on)continue;const q=o.m.position;
+  q.x+=(rnd()-.5)*.02+(k=='na'?d*.012:k=='cl'?-d*.012:k=='oh'?-d*.008:0);q.y+=(rnd()-.5)*.02;q.z+=(rnd()-.5)*.02;
+  if(k=='cl'&&q.x<-.62&&run&&rnd()<.04){q.x=-.2+rnd()*1.4}
+  if(hasDia&&k=='oh')q.x=Math.max(q.x,.1);
+  q.x=Math.max(-1.45,Math.min(1.45,q.x));q.y=Math.max(-.9,Math.min(1.3,q.y));const r=Math.hypot(q.x,q.z);if(r>1.5){q.x*=1.5/r;q.z*=1.5/r}}}
+function stepBub(dt){const E=mode=='cu'?(cuAn?[]:[[-1.2,.25,'o2']]):[[-.7,-.8,'cl'],[.7,-.8,'h2']];
+ if(run&&E.length){acc+=14*V/4.5*dt;while(acc>=1){acc--;const b=bub.find(x=>!x.on);if(!b)break;const e=E[Math.floor(rnd()*E.length)];
+  b.on=true;b.k=e[2];b.m.material=bmat[b.k];b.m.visible=true;b.m.scale.setScalar(.06+rnd()*.05);b.m.position.set(e[0]+(rnd()-.5)*.1,e[1]+rnd()*.2,(rnd()-.5)*.12);b.v=.5+rnd()*.5;b.ph=rnd()*6}}
+ for(const b of bub){if(!b.on)continue;b.m.position.y+=b.v*dt*V/4.5;b.m.position.x+=Math.sin(rt*9+b.ph)*.0012;
+  if(b.k=='cl'&&!hasDia){b.m.scale.multiplyScalar(1-dt*.9);if(b.m.scale.x<.02)b.on=b.m.visible=false}
+  if(b.m.position.y>1.4){b.on=false;b.m.visible=false}}}
+const cl=(a,b,t)=>new THREE.Color(a).lerp(new THREE.Color(b),t);
+function colors(){if(mode=='cu'){liqCu.color.copy(cl(0x1e88e5,0xe3f3fb,cuAn?0:p*.95));
+  anCu.material.color.set(cuAn?0xb87333:0x2b2b2b);const s=cuAn?.11*(1-.55*p):.11;anCu.scale.set(s,2.75,s);
+  const r=.115+.08*p;dep.scale.set(r,1.25,r);dep.visible=p>.005;return}
+ const clear=0xe6f4f1;let c=new THREE.Color(clear);if(!hasDia)c.lerp(new THREE.Color(0xe3ee9e),p*.6);
+ const pk=phen?(hasDia?0:Math.min(1,p*4)*(1-Math.min(1,Math.max(0,(p-.35)/.35)))):0;
+ liqL.color.copy(c.clone().lerp(new THREE.Color(0xff1f8e),pk));
+ liqR.color.copy(hasDia?cl(clear,phen?0xff1f8e:clear,Math.min(1,p*1.6)):liqL.color);
+ cupL.color.copy(hasDia?new THREE.Color(phen?0xff6fb0:clear):c);dia.visible=hasDia;
+ const tg=!hasDia?Math.min(1,p*1.2):0;if(dip)bl+=(tg-bl)*Math.min(1,.8*.016);petal.material.color.copy(cl(0xf06292,0xf7f3ee,bl));petal.position.y=dip?-.7:-.75}
+const INFO={
+ cu:()=>cuAn?{t:'Điện phân CuSO₄ với anode đồng (Cu)',a:'Cu → Cu²⁺ + 2e',c:'Cu²⁺ + 2e → Cu',o:'Cu (anode) → Cu (cathode)',p:'Anode mòn dần, nồng độ CuSO₄ không đổi (màu xanh giữ nguyên), Cu bám lên cathode. Ứng dụng: tinh chế đồng, mạ điện.'}
+  :{t:'Điện phân CuSO₄ với điện cực trơ (graphite)',a:'2H₂O → O₂ + 4H⁺ + 4e',c:'Cu²⁺ + 2e → Cu',o:'2CuSO₄ + 2H₂O → 2Cu + O₂ + 2H₂SO₄',p:'Cu đỏ cam bám trên cathode; khí O₂ thoát ra ở anode; màu xanh nhạt dần vì Cu²⁺ giảm, H₂SO₄ tạo thành. Cu²⁺ dễ bị khử hơn H₂O; H₂O dễ bị oxi hoá hơn SO₄²⁻.'},
+ na:()=>hasDia?{t:'Điện phân NaCl có màng ngăn xốp',a:'2Cl⁻ → Cl₂ + 2e',c:'2H₂O + 2e → H₂ + 2OH⁻',o:'2NaCl + 2H₂O → 2NaOH + H₂ + Cl₂',p:'Khí Cl₂ (vàng lục, hắc) ở anode; khí H₂ ở cathode; dung dịch quanh cathode chứa NaOH nên phenolphthalein hoá hồng. Na⁺ không bị khử trong dung dịch nước. Ứng dụng: công nghiệp xút – chlorine.'}
+  :{t:'Điện phân NaCl không màng ngăn (nước Javel)',a:'2Cl⁻ → Cl₂ + 2e',c:'2H₂O + 2e → H₂ + 2OH⁻',o:'Cl₂ + 2NaOH → NaCl + NaClO + H₂O  ⇒  NaCl + H₂O → NaClO + H₂',p:'Cl₂ tan và phản ứng ngay với NaOH nên bọt Cl₂ nhỏ dần. Thu được NaCl + NaClO (nước Javel) có tính tẩy màu: cánh hoa hồng bị mất màu. Nên đậy nắp để hạn chế khí Cl₂ độc thoát ra.'}};
+const PR={cu:{t:'Thí nghiệm: Điện phân dung dịch CuSO₄',h:'dung dịch CuSO₄ 0,5 M.',d:'nguồn điện một chiều (3–6 V), ống thuỷ tinh hình chữ U, hai điện cực than chì, dây dẫn, kẹp kim loại.',
+ s:['Lắp thiết bị thí nghiệm điện phân dung dịch CuSO₄ như Hình 16.2.','Rót dung dịch CuSO₄ 0,5 M vào ống thuỷ tinh hình chữ U rồi nhúng hai điện cực than chì vào dung dịch.','Nối hai điện cực than chì với hai cực của nguồn điện và tiến hành điện phân trong khoảng 5 phút (bấm “Bật nguồn”).']},
+ na:{t:'Thí nghiệm: Điện phân dung dịch NaCl (tự điều chế nước Javel để tẩy rửa)',h:'dung dịch NaCl bão hoà, cánh hoa màu hồng.',d:'nguồn điện một chiều (3–6 V), cốc thuỷ tinh 100 mL, hai điện cực than chì, dây dẫn, kẹp kim loại.',
+ s:['Lắp thiết bị thí nghiệm điện phân dung dịch NaCl với điện cực trơ như Hình 16.3.','Rót khoảng 80 mL dung dịch NaCl bão hoà vào cốc rồi nhúng hai điện cực than chì vào dung dịch.','Nối hai điện cực với hai cực của nguồn điện và tiến hành điện phân trong khoảng 5 phút (bấm “Bật nguồn”).','Cho một mẫu cánh hoa màu hồng vào cốc chứa khoảng 5 mL dung dịch sau điện phân (bấm “Nhúng cánh hoa”).']}};
+const QS={cu:[
+ ['Quan sát hiện tượng xảy ra ở mỗi điện cực và giải thích.','Cathode: kim loại Cu màu đỏ cam bám lên điện cực vì Cu²⁺ dễ bị khử hơn H₂O. Anode: có khí O₂ thoát ra vì H₂O dễ bị oxi hoá hơn SO₄²⁻.'],
+ ['Ion nào di chuyển về anode, ion nào về cathode?','SO₄²⁻ (và OH⁻) di chuyển về anode (+); Cu²⁺ (và H⁺) di chuyển về cathode (−). Electron đi từ anode qua dây dẫn và nguồn tới cathode.'],
+ ['Viết quá trình oxi hoá ở anode và quá trình khử ở cathode.','Anode: 2H₂O → O₂ + 4H⁺ + 4e. Cathode: Cu²⁺ + 2e → Cu.'],
+ ['Viết phương trình hoá học của phản ứng điện phân.','2CuSO₄ + 2H₂O → 2Cu + O₂ + 2H₂SO₄ (điều kiện: điện phân dung dịch).'],
+ ['Màu xanh của dung dịch thay đổi thế nào? Vì sao?','Nhạt dần vì Cu²⁺ bị khử thành Cu, đồng thời tạo H₂SO₄ nên dung dịch có tính acid.'],
+ ['Nếu thay anode bằng thanh đồng (Cu) thì hiện tượng thay đổi ra sao? (hãy tích chọn “Anode bằng Cu” để kiểm chứng)','Anode: Cu → Cu²⁺ + 2e nên anode tan dần, không có khí O₂, nồng độ CuSO₄ không đổi. Ứng dụng: tinh chế đồng, mạ điện.']],
+ na:[
+ ['Viết quá trình oxi hoá, quá trình khử ở mỗi điện cực, biết sản phẩm của quá trình điện phân có khí Cl₂ và H₂.','Anode: 2Cl⁻ → Cl₂ + 2e. Cathode: 2H₂O + 2e → H₂ + 2OH⁻.'],
+ ['Viết phương trình hoá học của phản ứng điện phân.','2NaCl + 2H₂O → 2NaOH + H₂ + Cl₂ (có màng ngăn).'],
+ ['Trong quá trình điện phân, sản phẩm tạo thành ở hai điện cực khuếch tán vào nhau sẽ xảy ra phản ứng hoá học nào?','Cl₂ + 2NaOH → NaCl + NaClO + H₂O. Tổng quát: NaCl + H₂O → NaClO + H₂.'],
+ ['Giải thích hiện tượng quan sát được ở mỗi điện cực.','Anode: Cl⁻ bị oxi hoá thành khí Cl₂ (vàng lục, mùi hắc). Cathode: H₂O bị khử thành khí H₂ và OH⁻ (Na⁺ không bị khử trong dung dịch).'],
+ ['Giải thích khả năng tẩy màu của dung dịch sau điện phân.','Dung dịch chứa NaClO (nước Javel) có tính oxi hoá mạnh nên làm mất màu cánh hoa hồng.'],
+ ['Tại sao nên dùng nắp đậy trong quá trình điện phân?','Để hạn chế khí Cl₂ độc thoát ra ngoài và giữ lại cho Cl₂ phản ứng với NaOH tạo nước Javel.']]};
+function renderInfo(){const i=INFO[mode]();return `<h3 style="margin:0 0 6px;font-size:15px">${i.t}</h3><div class="mu">Anode (+): oxi hoá</div><code class="eq">${i.a}</code><div class="mu">Cathode (−): khử</div><code class="eq">${i.c}</code><div class="mu">Tổng quát</div><code class="eq">${i.o}</code><div class="mu" style="margin-top:6px">${i.p}</div><div class="mu" style="margin-top:6px">Electron (hạt vàng) đi từ anode → cực (+) của nguồn; từ cực (−) của nguồn → cathode.</div>`}
+let lt=0,lsig='';
+function renderLeft(){const P=PR[mode],t=[1,1,tt>=300?1:0,dip?1:0],cur=t.indexOf(0);
+ let h='';if(lt==0)h=`<h3 style="margin:0 0 8px;font-size:15px">${P.t}</h3><p><b><i>Hoá chất:</i></b> ${P.h}</p><p><b><i>Dụng cụ:</i></b> ${P.d}</p><p class="mu">Chuyển sang tab “Tiến hành” để thực hiện từng bước trên mô hình 3D.</p>`;
+ else if(lt==1)h=`<ol class="st">${P.s.map((s,i)=>`<li class="${t[i]?'done':i==cur?'cur':''}">${t[i]?'✅':i==cur?'▶️':'⬜'} <b>Bước ${i+1}.</b> ${s}${i==2?` <div class="mu">Mô phỏng: ${String(Math.floor(tt/60)).padStart(2,'0')}:${String(Math.floor(tt%60)).padStart(2,'0')} / 05:00</div>`:''}</li>`).join('')}</ol><p><i>Quan sát hiện tượng xảy ra và trả lời các câu hỏi ở khung bên phải.</i></p>`;
+ else h=renderInfo();
+ const sig=lt+mode+h;if(sig!==lsig){$('lp').innerHTML=h;lsig=sig}}
+function renderQs(){$('qs').innerHTML=QS[mode].map((q,i)=>`<div class="q"><b>${i+1}. ${q[0]}</b><textarea placeholder="Nhập câu trả lời của em…"></textarea><button data-i="${i}">Xem đáp án</button><div class="ans" id="a${i}">${q[1]}</div></div>`).join('');
+ $('qs').querySelectorAll('button').forEach(b=>b.onclick=()=>{const a=$('a'+b.dataset.i);a.classList.toggle('sh');b.textContent=a.classList.contains('sh')?'Ẩn đáp án':'Xem đáp án'})}
+function legend(){const ks=mode=='cu'?['cu','so','h']:['na','cl','oh','clo'];$('lgd').innerHTML=ks.map(k=>`<span><i style="background:#${IT[k][0].toString(16).padStart(6,'0')}"></i>${IT[k][2]}</span>`).join('')+'<span><i style="background:#fff;border:1px solid #888"></i>Bọt khí</span><span><i style="background:#ffe14d"></i>Electron e⁻</span>'}
+function readout(){const ne=Q/F,mm=Math.floor(tt/60),ss=Math.floor(tt%60),f=(x,d=1)=>x.toFixed(d);let h=`⏱ <b>${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}</b> · I = <b>${f(.2*V,2)}</b> A · Q = <b>${f(Q,0)}</b> C · n(e) = <b>${f(ne*1000,2)}</b> mmol · `;
+ if(mode=='cu')h+=`m(Cu) bám cathode: <b>${f(ne/2*63.5,3)}</b> g`+(cuAn?` · Anode tan: <b>${f(ne/2*63.5,3)}</b> g`:` · V(O₂): <b>${f(ne/4*VM*1000,0)}</b> mL · n(H₂SO₄): <b>${f(ne/2*1000,2)}</b> mmol`);
+ else h+=`V(H₂): <b>${f(ne/2*VM*1000,0)}</b> mL`+(hasDia?` · V(Cl₂): <b>${f(ne/2*VM*1000,0)}</b> mL · n(NaOH): <b>${f(ne*1000,1)}</b> mmol`:` · n(NaClO): <b>${f(ne/2*1000,1)}</b> mmol`);
+ $('ro').innerHTML=h;renderLeft()}
+function setMode(m){mode=m;gCu.visible=m=='cu';gNa.visible=m=='na';$('tCu').classList.toggle('on',m=='cu');$('tNa').classList.toggle('on',m=='na');
+ $('optCu').style.display=m=='cu'?'':'none';$('optNa').style.display=m=='na'?'':'none';$('bPetal').style.display=m=='na'?'':'none';
+ reset();renderQs();legend();readout();fit()}
+$('tCu').onclick=()=>setMode('cu');$('tNa').onclick=()=>setMode('na');$('bView').onclick=fit;
+$('lt').querySelectorAll('button').forEach(b=>b.onclick=()=>{lt=+b.dataset.t;$('lt').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x==b));renderLeft()});
+$('cAn').onchange=e=>{cuAn=e.target.checked;reset();readout()};$('cDia').onchange=e=>{hasDia=e.target.checked;reset();readout()};
+$('cPh').onchange=e=>phen=e.target.checked;$('cIon').onchange=e=>showIon=e.target.checked;
+$('V').oninput=e=>{V=+e.target.value;$('vv').textContent=V};$('spd').onchange=e=>sp=+e.target.value;
+$('bRun').onclick=()=>{run=!run;$('bRun').textContent=run?'⏸ Tắt nguồn':'▶ Bật nguồn';$('bRun').className=run?'':'go'};
+$('bRst').onclick=()=>{reset();readout()};$('tFs').onclick=()=>$('app').classList.toggle('fs');
+$('bPetal').onclick=()=>{if(p<.1)alert('Hãy điện phân thêm một lúc rồi mới lấy mẫu dung dịch.');else dip=true};
+function tick(){requestAnimationFrame(tick);const dt=Math.min(.05,clock.getDelta());rt+=dt;
+ if(run){tt+=dt*sp;Q+=.2*V*dt*sp;p=Math.min(1,Q/qmax())}
+ for(const e of EL){const v=run&&e.g.visible;e.m.visible=v;if(v){e.u=(e.u+dt*2.5*V/4.5/e.L)%1;e.m.position.copy(e.P.getPointAt(e.u))}}
+ stepIons(dt);stepBub(dt);colors();if(rt%.1<dt)readout();R.render(S,cam)}
+setMode('cu');tick();
+</script></body></html>
